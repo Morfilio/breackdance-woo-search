@@ -2,7 +2,7 @@
 /*
  * Plugin Name:       Breakdance WooCommerce Search Page Override
  * Description:       Overrides default Wordpress search posts page to search for products.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Andrei Cojocaru
 */
 
@@ -12,10 +12,18 @@
  *
  * @param object $query The main WordPress query.
  */
-function tg_include_custom_post_types_in_search_results($query)
+
+function wpb_change_search_url()
 {
-  if ($query->is_main_query() && $query->is_search() && !is_admin()) {
-    $query->set('post_type', array('products'));
+  if (is_search() && !empty($_GET['s']) && empty($_GET['post_type'])) {
+    $new_url = add_query_arg(
+      array(
+        'post_type' => 'product'
+      ),
+      add_query_arg($wp->query_vars, home_url($wp->request))
+    );
+    wp_redirect($new_url);
+    exit();
   }
 }
-add_action('pre_get_posts', 'tg_include_custom_post_types_in_search_results');
+add_action('template_redirect', 'wpb_change_search_url');
